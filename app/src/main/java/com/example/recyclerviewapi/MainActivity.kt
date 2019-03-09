@@ -2,20 +2,16 @@ package com.example.recyclerviewapi
 
 import android.os.Bundle
 import android.util.Log
-import com.google.android.material.snackbar.Snackbar
-import androidx.appcompat.app.AppCompatActivity;
 import android.view.Menu
 import android.view.MenuItem
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.recyclerviewapi.adapter.MemberAdapter
 import com.example.recyclerviewapi.entity.Member
 import com.example.recyclerviewapi.network.MainService
-import com.example.recyclerviewapi.utils.FontHelper
-import com.example.recyclerviewapi.utils.TypefaceManager
-
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
-import kotlinx.android.synthetic.main.data_card.*
 import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
 
@@ -23,9 +19,8 @@ class MainActivity : AppCompatActivity(),CoroutineScope {
 
     private  lateinit var mJob: Job
     //API to Recycler View
-    private lateinit var member_adapter: MemberAdapter
-    //Font Detector
-    private lateinit var typefaceManager: TypefaceManager
+    private lateinit var memberAdapter: MemberAdapter
+
     private val myMember: MutableList<Member> = ArrayList()
 
     override val coroutineContext: CoroutineContext
@@ -36,13 +31,11 @@ class MainActivity : AppCompatActivity(),CoroutineScope {
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
 
-
-
-        member_adapter = MemberAdapter(myMember)
+        memberAdapter = MemberAdapter(myMember,assets)
         recycler_view.apply {
             layoutManager = LinearLayoutManager(context)
             setHasFixedSize(true)
-            adapter = member_adapter
+            adapter = memberAdapter
         }
         mJob = Job()
         val api = MainService()
@@ -51,18 +44,11 @@ class MainActivity : AppCompatActivity(),CoroutineScope {
             try{
                 val response = request.await()
                 myMember.addAll(response.body()!!.data)
-                member_adapter.notifyDataSetChanged()
+                memberAdapter.notifyDataSetChanged()
 
                 if(response.isSuccessful){
                     Log.d("MY_RESPONSE",response.body().toString())
-                    typefaceManager = TypefaceManager(assets)
-                    if (FontHelper.isUnicode()){
-                        member_name.typeface = typefaceManager.uni
-                        previous_occupation.typeface = typefaceManager.uni
-                    }else{
-                        member_name.typeface= typefaceManager.zawgyi
-                        previous_occupation.typeface = typefaceManager.zawgyi
-                    }
+
                 }
                 else{
                     Log.d("MY_ERROR" , "something wrong")
@@ -73,7 +59,7 @@ class MainActivity : AppCompatActivity(),CoroutineScope {
             }
 
         }
-        //Font Detect
+
 
 
         fab.setOnClickListener { view ->
